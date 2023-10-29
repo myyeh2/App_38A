@@ -1,109 +1,3 @@
-﻿using System;
-using Matrix_0; 
-// Ray W. Clough & Joseph Penzien "Dynamics of Structures" P202-203 
-
-namespace ConsoleApp38
-{
-    internal class Program
-    {
-        static void Main(string[] args)
-        {
-
-// 初始值InitVal(速度，變位)。
-double[,] InitVal = { {0}, {9}, {0}, {0.5}, {0.4}, {0.3} }; 
-
-// 建構系統矩陣A。
-double[,] M = { { 1, 0, 0 }, { 0, 1.5, 0 }, { 0, 0, 2 } };
-double[,] K = { {600, -600, 0}, {-600, 1800, -1200 }, {0, -1200, 3000} };
-ReMatrix C = (new Zero(3)).GetMatrix;
-MKCMatrix mkc = new MKCMatrix(M, K, C);
-ReMatrix A = mkc.Matrix;
-
-// 系統特徵值和特徵向量V, Q。
-EIG eig = new EIG(A);
-CxMatrix D = eig.CxMatrixD;
-CxMatrix V = eig.CxVector;
-CxMatrix Q = eig.CxMatrixQ;
-
-// 系統係數向量d
-CxToHexp Hexp = new CxToHexp(D, Q, 0);
-CxMatrix MatTemp = Hexp.GetCxMatrix;
-CxMatrix d = ~MatTemp * InitVal;
-
-// 列印系統與狀態參數V,Q,d。
-Console.Write("\n****{0,5}系{0,5}統{0,5}與{0,5}狀{0,5}態{0,5}參{0,5}數{0,5}****\n", "");
-
-Console.Write("\n***{0,5}系統特徵值V{0,5}***\n{1}\n", "", new PR(V));
-Console.Write("\n***{0,5}系統特徵向量Q{0,5}***\n{1}\n", "", new PR(Q));
-Console.Write("\n***{0,5}係數向量d{0,5}***\n{1}\n", "", new PR(d));
-
-// 狀態響應。速度，變位，加速度。(t = 40秒)
-double step = 0.5;
-int iRow = (int)(40 / step + 1);
-int iCol = M.GetLength(1) + 1;
-ReMatrix Disp = new ReMatrix(iRow, iCol);
-ReMatrix Vel = new ReMatrix(iRow, iCol);
-ReMatrix Acc = new ReMatrix(iRow, iCol);
-for (int i = 0; i != iRow; i++)
-{
-    double t = step * i;
-
-    Hexp = new CxToHexp(D, Q, t);
-    MatTemp = Hexp.GetCxMatrix;
-    CxMatrix yh_Cx = MatTemp * d;
-    ReMatrix yh_Re = (ReMatrix)yh_Cx;
-    ReMatrix yhDot_Re = A * yh_Re;
-
-    // 加速度Acc。 
-    Acc.Matrix[i, 0] = t;
-    Acc.Matrix[i, 1] = yhDot_Re.Matrix[0, 0];
-    Acc.Matrix[i, 2] = yhDot_Re.Matrix[1, 0];
-    Acc.Matrix[i, 3] = yhDot_Re.Matrix[2, 0];
-
-    // 速度Vel。
-    Vel.Matrix[i, 0] = t;
-    Vel.Matrix[i, 1] = yh_Re.Matrix[0, 0];
-    Vel.Matrix[i, 2] = yh_Re.Matrix[1, 0];
-    Vel.Matrix[i, 3] = yh_Re.Matrix[2, 0];
-                
-    // 位移Disp。
-    Disp.Matrix[i, 0] = t;
-    Disp.Matrix[i, 1] = yh_Re.Matrix[3, 0];
-    Disp.Matrix[i, 2] = yh_Re.Matrix[4, 0];
-    Disp.Matrix[i, 3] = yh_Re.Matrix[5, 0];
-
-}
-
-// 列印標題。
-Console.Write("\n****{0,10}狀{0,5}態{0,5}響{0,5}應{0,10}****\n", "");
-
-// 列印狀態響應(節點的變位，速度，和加速)。 
-Console.Write("\n{0,5}***位移反應量***{0,5}\n{0,8}時間(秒)" +
-    "{0,8}第0點位移{0,8}第1點位移{0,8}第2點位移\n\n{1}", 
-    "", new PR(Disp));
-Console.Write("\n{0,5}***速度反應量***{0,5}\n{0,8}時間(秒)" +
-    "{0,8}第0點速度{0,8}第1點速度{0,8}第2點速度\n\n{1}", 
-    "", new PR(Vel));
-Console.Write("\n***{0,5}加速度反應量{0,5}***\n{0,8}時間(秒)" +
-    "{0,7}第0點加速度{0,7}第1點加速度{0,7}第2點加速度\n\n{1}", 
-    "", new PR(Acc));
-
-// 分別列印時間、節點變位、速度、和加速度等序列。
-Console.Write("\n時間序列 :\n{0}\n", new PR4(Disp, 0));
-
-Console.Write("\n第0點變位序列 :\n{0}\n", new PR4(Disp, 1));
-Console.Write("\n第1點變位序列 :\n{0}\n", new PR4(Disp, 2));
-Console.Write("\n第2點變位序列 :\n{0}\n", new PR4(Disp, 3));
-Console.Write("\n第0點速度序列 :\n{0}\n", new PR4(Vel, 1));
-Console.Write("\n第1點速度序列 :\n{0}\n", new PR4(Vel, 2));
-Console.Write("\n第2點速度序列 :\n{0}\n", new PR4(Vel, 3));
-Console.Write("\n第0點加速度序列 :\n{0}\n", new PR4(Acc, 1));
-Console.Write("\n第1點嗲速度序列 :\n{0}\n", new PR4(Acc, 2));
-Console.Write("\n第2點加速度序列 :\n{0}\n", new PR4(Acc, 3));
-        }
-    }
-}
-
 /*
 ****     系     統     與     狀     態     參     數     ****
 
@@ -144,7 +38,7 @@ Console.Write("\n第2點加速度序列 :\n{0}\n", new PR4(Acc, 3));
 
 ****          狀     態     響     應          ****
      ***位移反應量***
-        時間(秒)        第0點位移        第1點位移        第2點位移
+        時間(秒)         第0點位移        第1點位移        第2點位移
         0.00000          0.50000          0.40000          0.30000
         0.50000          0.71318          0.29042          0.16971
         1.00000         -0.01535          0.19230         -0.02364
@@ -228,7 +122,7 @@ Console.Write("\n第2點加速度序列 :\n{0}\n", new PR4(Acc, 3));
        40.00000         -0.32576         -0.32351         -0.29580
 
      ***速度反應量***
-        時間(秒)        第0點速度        第1點速度        第2點速度
+        時間(秒)         第0點速度        第1點速度        第2點速度
         0.00000          0.00000          9.00000          0.00000
         0.50000          0.99358         -9.08588         -0.24465
         1.00000        -14.04659         -3.77331          0.04379
@@ -547,7 +441,7 @@ Console.Write("\n第2點加速度序列 :\n{0}\n", new PR4(Acc, 3));
   210.3398,   -160.6763,     44.1455,   -229.7858,     20.9681,
     1.3513,
 
-第1點嗲速度序列 :
+第1點加速度序列 :
   -40.0000,     72.5366,   -255.8109,    190.1648,    193.7673,
  -186.4644,     63.9639,    -18.8962,   -198.1859,     57.2477,
   290.1210,   -225.8694,    147.4130,    -48.7017,   -192.7625,
