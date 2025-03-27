@@ -1,41 +1,35 @@
 ﻿// Ray W. Clough & Joseph Penzien "Dynamics of Structures" 
 //  Page 第202頁至第203頁  
-using System;
-using Matrix_0; 
 
-namespace ConsoleApp38
-{
-    internal class Program
-    {
-        static void Main(string[] args)
-        {
+using Matrix_0;
 
 // 初始值InitVal(速度，變位)。
-double[,] InitVal = { {0}, {9}, {0}, {0.5}, {0.4}, {0.3} }; 
+double[,] InitVal = { { 0 }, { 9 }, { 0 }, { 0.5 }, { 0.4 }, { 0.3 } };
 
 // 建構系統矩陣A。
 double[,] M = { { 1, 0, 0 }, { 0, 1.5, 0 }, { 0, 0, 2 } };
-double[,] K = { {600, -600, 0}, {-600, 1800, -1200 }, {0, -1200, 3000} };
+double[,] K = { { 600, -600, 0 }, { -600, 1800, -1200 }, { 0, -1200, 3000 } };
 ReMatrix C = (new Zero(3)).GetMatrix;
 MKCMatrix mkc = new MKCMatrix(M, K, C);
 ReMatrix A = mkc.Matrix;
 
-// 系統特徵值和特徵向量V, Q。
+// 系統特徵值V和模態(特徵向量)矩陣Q。
 EIG eig = new EIG(A);
 CxMatrix D = eig.CxMatrixD;
 CxMatrix V = eig.CxVector;
 CxMatrix Q = eig.CxMatrixQ;
 
 // 系統係數向量d
-CxToHexp Hexp = new CxToHexp(D, Q, 0);
+CxHexp Hexp = new CxHexp(D, Q, 0);
 CxMatrix MatTemp = Hexp.GetCxMatrix;
 CxMatrix d = ~MatTemp * InitVal;
 
 // 列印系統與狀態參數V,Q,d。
-Console.Write("\n****{0,5}系{0,5}統{0,5}與{0,5}狀{0,5}態{0,5}參{0,5}數{0,5}****\n", "");
+Console.Write(
+    "\n****{0,5}系{0,5}統{0,5}與{0,5}狀{0,5}態{0,5}參{0,5}數{0,5}****\n", "");
 
 Console.Write("\n***{0,5}系統特徵值V{0,5}***\n{1}\n", "", new PR(V));
-Console.Write("\n***{0,5}系統特徵向量Q{0,5}***\n{1}\n", "", new PR(Q));
+Console.Write("\n***{0,5}模態矩陣Q{0,5}***\n{1}\n", "", new PR(Q));
 Console.Write("\n***{0,5}係數向量d{0,5}***\n{1}\n", "", new PR(d));
 
 // 狀態響應。速度，變位，加速度。(t = 40秒)
@@ -49,7 +43,7 @@ for (int i = 0; i != iRow; i++)
 {
     double t = step * i;
 
-    Hexp = new CxToHexp(D, Q, t);
+    Hexp = new CxHexp(D, Q, t);
     MatTemp = Hexp.GetCxMatrix;
     CxMatrix yh_Cx = MatTemp * d;
     ReMatrix yh_Re = (ReMatrix)yh_Cx;
@@ -66,7 +60,7 @@ for (int i = 0; i != iRow; i++)
     Vel.Matrix[i, 1] = yh_Re.Matrix[0, 0];
     Vel.Matrix[i, 2] = yh_Re.Matrix[1, 0];
     Vel.Matrix[i, 3] = yh_Re.Matrix[2, 0];
-                
+
     // 位移Disp。
     Disp.Matrix[i, 0] = t;
     Disp.Matrix[i, 1] = yh_Re.Matrix[3, 0];
@@ -80,13 +74,13 @@ Console.Write("\n****{0,10}狀{0,5}態{0,5}響{0,5}應{0,10}****\n", "");
 
 // 列印狀態響應(節點的變位，速度，和加速)。 
 Console.Write("\n{0,5}***位移反應量***{0,5}\n{0,8}時間(秒)" +
-    "{0,8}第0點位移{0,8}第1點位移{0,8}第2點位移\n\n{1}", 
+    "{0,8}第0點位移{0,8}第1點位移{0,8}第2點位移\n\n{1}",
     "", new PR(Disp));
 Console.Write("\n{0,5}***速度反應量***{0,5}\n{0,8}時間(秒)" +
-    "{0,8}第0點速度{0,8}第1點速度{0,8}第2點速度\n\n{1}", 
+    "{0,8}第0點速度{0,8}第1點速度{0,8}第2點速度\n\n{1}",
     "", new PR(Vel));
 Console.Write("\n***{0,5}加速度反應量{0,5}***\n{0,8}時間(秒)" +
-    "{0,7}第0點加速度{0,7}第1點加速度{0,7}第2點加速度\n\n{1}", 
+    "{0,7}第0點加速度{0,7}第1點加速度{0,7}第2點加速度\n\n{1}",
     "", new PR(Acc));
 
 // 分別列印時間、節點變位、速度、和加速度等序列。
@@ -101,11 +95,8 @@ Console.Write("\n第2點速度序列 :\n{0}\n", new PR4(Vel, 3));
 Console.Write("\n第0點加速度序列 :\n{0}\n", new PR4(Acc, 1));
 Console.Write("\n第1點加速度序列 :\n{0}\n", new PR4(Acc, 2));
 Console.Write("\n第2點加速度序列 :\n{0}\n", new PR4(Acc, 3));
-        }
-    }
-}
 
-/*
+/*輸出結果如下 :  
 ****     系     統     與     狀     態     參     數     ****
 
 ***     系統特徵值V     ***
@@ -586,5 +577,4 @@ Console.Write("\n第2點加速度序列 :\n{0}\n", new PR4(Acc, 3));
    56.4800,   -134.2588,     20.7699,    112.4594,   -298.9330,
   249.5988,
 
-請按任意鍵繼續 . . .
-*/
+ */
